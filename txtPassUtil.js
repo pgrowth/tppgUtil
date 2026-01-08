@@ -133,4 +133,43 @@ function changetheme(themecolor) {
 
 }
 
+/**
+ * Replaces merge fields in a string with corresponding values from a JSON object.
+ *
+ * @param {string} inputString - The string containing merge fields in the format <Field Name>.
+ * @param {Object} values - A JSON object where keys correspond to merge fields (spaces replaced with underscores).
+ * @returns {{ result: string, code: string, message?: string }} An object containing:
+ *          - `result`: The processed string with merge fields replaced.
+ *          - `code`: "success" if all fields were replaced, "error" otherwise.
+ *          - `message`: An error message if a merge field value is missing.
+ * 
+ * 
+ */
+function fillMerge(inputString, values) {
+  const mergeFieldRegex = /<([^>]+)>/g;
+  let resultString = inputString;
+  let missingKeys = [];
 
+  resultString = resultString.replace(mergeFieldRegex, (match, fieldName) => {
+    const key = fieldName.replace(/ /g, '_');
+    if (values.hasOwnProperty(key)) {
+      return values[key];
+    } else {
+      missingKeys.push(fieldName);
+      return match;
+    }
+  });
+
+  if (missingKeys.length > 0) {
+    return {
+      result: inputString,
+      code: "error",
+      message: `Key(s) not found: ${missingKeys.join(', ')}`
+    };
+  }
+
+  return {
+    result: resultString,
+    code: "success"
+  };
+}

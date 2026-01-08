@@ -103,6 +103,38 @@ const hexColor = hslToHex(200, 50, 50);
 console.log(hexColor); // "#40BFBF"
 ```
 
+---
+
+### `fillMerge(inputString, values)`
+
+Replaces merge fields in a string with corresponding values from a JSON object. Merge fields use angle bracket syntax like `<Field Name>`.
+
+**Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `inputString` | `string` | The string containing merge fields in the format `<Field Name>` |
+| `values` | `Object` | A JSON object where keys correspond to merge fields (spaces replaced with underscores) |
+
+**Returns:** `Object` - An object containing:
+- `result`: The processed string with merge fields replaced (original string if error)
+- `code`: `"success"` if all fields were replaced, `"error"` otherwise
+- `message`: An error message if a merge field value is missing (only present on error)
+
+**Example:**
+```javascript
+// Successful merge
+const template = "Hello <First Name>, your order <Order ID> is ready!";
+const data = { First_Name: "John", Order_ID: "12345" };
+const result = fillMerge(template, data);
+console.log(result);
+// { result: "Hello John, your order 12345 is ready!", code: "success" }
+
+// Missing field
+const partial = fillMerge("<First Name> <Last Name>", { First_Name: "John" });
+console.log(partial);
+// { result: "<First Name> <Last Name>", code: "error", message: "Key(s) not found: Last Name" }
+```
+
 ## CSS Usage
 
 After calling `changetheme()`, use the CSS variables in your stylesheets:
