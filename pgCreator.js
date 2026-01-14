@@ -220,6 +220,59 @@ export default class AppRec {
     return this.records;
   }
 
+  /**
+   * Reads a record by its ID from the Zoho Creator report with optional fields.
+   * @async
+   * @param {string} recID - The ID of the record to read.
+   * @param {string} [field_config="all"] - Field config: "all", "minimal", or "custom".
+   * @param {Array<string>} [fields=[]] - Array of field names if field_config is "custom".
+   * @returns {Promise<Object>} The record object.
+   * @throws {Error} If the API call fails.
+   */
+  async readByID(recID, field_config = "all", fields = []) {
+    //  this._checkSDK();
+
+    this.clear();
+
+    const config = {
+      //   ...this._baseConfig(),
+      id: recID,
+      report_name: this.report,
+      field_config: field_config,
+    };
+
+    if (fields.length > 0 && field_config === "custom") {
+      config.fields = fields;
+    }
+
+    let hasMore = true;
+    let cursor = null;
+
+    while (hasMore) {
+      if (cursor) {
+        config.record_cursor = cursor;
+      } else {
+        delete config.record_cursor;
+      }
+
+      try {
+        const response = await ZOHO.CREATOR.DATA.getRecordById(config);
+        const records = this._validateResponse(response, "ReadByID");
+    //    this.records.push(...records.map((r) => this._normalize(r)));
+     this.records.push(records);
+
+        cursor = response.record_cursor;
+        hasMore = !!cursor;
+      } catch (error) {
+        console.error("Error in readByID:", error);
+        return [];
+      }
+    }
+
+    return this.records;
+  }
+  
+
   /* --------------------------------------------------
    * UPDATE
    * -------------------------------------------------- */
