@@ -288,7 +288,7 @@ export default class AppRec {
   async updateById(recordId, data = {}) {
     this._checkSDK();
 
-    if (!this.form) throw new Error("Form name required for update");
+  
     if (!recordId) throw new Error("recordId is required");
 
     const config = {
