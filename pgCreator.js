@@ -265,6 +265,7 @@ export default class AppRec {
         hasMore = !!cursor;
       } catch (error) {
         console.error("Error in readByID:", error);
+         throw new Error("Error in readByID:", error.message);
         return [];
       }
     }
@@ -288,7 +289,7 @@ export default class AppRec {
   async updateById(recordId, data = {}) {
     this._checkSDK();
 
-  
+    if (!this.report) throw new Error("Report name required for update");
     if (!recordId) throw new Error("recordId is required");
 
     const config = {
@@ -302,12 +303,23 @@ export default class AppRec {
 
     const response = await ZOHO.CREATOR.DATA.updateRecordById(config);
 
+    // console.log("Update config:", config);
+    // console.log("Update response:", response);
+
     const records = this._validateResponse(response, "Update");
 
-    this.records = records.map((r) => this._normalize(r));
-    return this.records;
-  }
+    // Get the record that corresponds to the inputted id
+    const updatedRecord = this.records.find((record) => record.id === recordId);
 
+    if (updatedRecord) {
+      Object.assign(updatedRecord, data);
+      console.log("Updated record:", updatedRecord);
+    }
+
+  
+
+    return this.records.filter((record) => record.id === recordId);
+  }
   /* --------------------------------------------------
    * DELETE
    * -------------------------------------------------- */
